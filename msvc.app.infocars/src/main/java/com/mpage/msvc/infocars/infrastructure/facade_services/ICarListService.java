@@ -5,5 +5,5 @@ import com.mpage.msvc.infocars.domain.entity.CarEntity;
 import java.util.List;
 
 public interface ICarListService {
-    List<CarEntity>list();
+    List<CarEntity>list(String authentication);
 }

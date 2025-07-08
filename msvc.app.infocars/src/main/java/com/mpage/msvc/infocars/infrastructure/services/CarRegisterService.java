@@ -9,7 +9,10 @@ import com.mpage.msvc.infocars.infrastructure.facade_services.ICarRegisterServic
 import com.mpage.msvc.infocars.util.exceptions.IdNotFoundExceptions;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.regex.Pattern;
 
 
 @Service
@@ -25,9 +28,19 @@ public class CarRegisterService implements ICarRegisterService {
         String refreshToken = autToken.substring(7);
         String user = jwtService.extractUsername(refreshToken);
         CarRegisterResponse response = new CarRegisterResponse();
-        var userFind = userRepository.findByUsername(user).orElseThrow(() -> new IdNotFoundExceptions("Usuario no encontrado"));
+        var carBd = carRepository.findByPlaca(request.placa());
+        if (carBd.isPresent()) {
+            response.setMessage("Car already exists");
+        } else {
+            Pattern placaPattern = Pattern.compile("^[a-zA-Z]{3}[0-9]{3}$");
+            if (!placaPattern.matcher(request.placa()).matches()) {
+                response.setMessage("Formato de placa inválido. Debe tener 3 letras seguidas de 3 números (ej. ABC123).");
+                throw new IdNotFoundExceptions(
+                        "Formato de placa inválido. Debe tener 3 letras seguidas de 3 números (ej. ABC123)."
+                );
+            }
+            var userFind = userRepository.findByUsername(user).orElseThrow(() -> new IdNotFoundExceptions("Usuario no encontrado"));
 
-        try {
             var carPersist = CarEntity.builder()
                     .marca(request.marca())
                     .modelo(request.modelo())
@@ -36,15 +49,9 @@ public class CarRegisterService implements ICarRegisterService {
                     .color(request.color())
                     .user(userFind)
                     .build();
-            var carPersistense = carRepository.save(carPersist);
+            carRepository.save(carPersist);
             response.setMessage("Car registered successfully");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.setMessage("Error while inserting car");
         }
-
-
         return response;
     }
 }
