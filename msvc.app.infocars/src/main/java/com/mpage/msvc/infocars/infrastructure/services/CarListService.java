@@ -8,6 +8,7 @@ import com.mpage.msvc.infocars.util.exceptions.IdNotFoundExceptions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -29,6 +30,11 @@ public class CarListService implements ICarListService {
         List<CarEntity> carList = StreamSupport.stream(carEntities.spliterator(), false)
                 .toList();
         return carList;
+    }
+
+    @Override
+    public CarEntity getCar(String placa) {
+        return carRepository.findByPlaca(placa).orElseThrow(() -> new IdNotFoundExceptions("Car no encontrado"));
     }
 
 

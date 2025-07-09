@@ -21,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/car")
+@CrossOrigin(origins = "http://localhost:3001")
 @RequiredArgsConstructor
 public class CarController {
 
@@ -35,6 +36,11 @@ public class CarController {
             @RequestBody final CarRegisterRequest request,
             @RequestHeader(HttpHeaders.AUTHORIZATION) final String authentication) {
         return carRegisterService.insertCar(request, authentication);
+    }
+
+    @GetMapping("find/{placa}")
+    public CarEntity getCar(@PathVariable("placa") final String placa) {
+        return carListService.getCar(placa);
     }
 
     @GetMapping("/all")
